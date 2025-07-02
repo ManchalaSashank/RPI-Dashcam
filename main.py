@@ -1,34 +1,42 @@
 from picamera2 import Picamera2
-from picamera2.encoders import H264Encoder
-from picamera2.outputs import FileOutput
 from datetime import datetime
 import os
+import time
 
-# Directory to store the video
-VIDEO_DIR = "/home/pi/videos"
-os.makedirs(VIDEO_DIR, exist_ok=True)
+# Set your USB mount path
+USB_PATH = "/media/usb"
 
-# Filename with timestamp
-timestamp = datetime.now().strftime("vid_%Y-%m-%d_%H-%M.h264")
-output_path = os.path.join(VIDEO_DIR, timestamp)
+# Create a new folder for today's date if it doesn't exist
+def get_today_folder():
+    date_folder = os.path.join(USB_PATH, datetime.now().strftime('%Y-%m-%d'))
+    os.makedirs(date_folder, exist_ok=True)
+    return date_folder
 
-# Setup camera
-picam2 = Picamera2()
-video_config = picam2.create_video_configuration(main={"size": (1280, 720), "format": "YUV420"}, controls={"FrameRate": 30})
-picam2.configure(video_config)
+# Start continuous video recording
+def start_continuous_recording():
+    # Setup PiCamera
+    picam2 = Picamera2()
+    video_config = picam2.create_video_configuration(main={"size": (1280, 720)})
+    picam2.configure(video_config)
 
-# Start recording
-encoder = H264Encoder(bitrate=3000000)
-output = FileOutput(output_path)
-picam2.start_recording(encoder, output)
-print(f"🎬 Continuous recording started: {output_path}")
+    # Create video file path
+    folder = get_today_folder()
+    filename = datetime.now().strftime('continuous_%H-%M.h264')
+    filepath = os.path.join(folder, filename)
 
-# Keep running forever until manually stopped
-try:
-    while True:
-        pass  # idle loop — the camera keeps recording
-except KeyboardInterrupt:
-    pass
-finally:
-    picam2.stop_recording()
-    print(f"Recording stopped and saved: {output_path}")
+    # Start recording
+    picam2.start()
+    picam2.start_recording(filepath)
+    print(f"Recording started: {filepath}")
+
+    try:
+        while True:
+            time.sleep(1) 
+    except KeyboardInterrupt:
+        print("Recording stopped by user.")
+    finally:
+        picam2.stop_recording()
+        print(f"Video saved to: {filepath}")
+
+if __name__ == "__main__":
+    start_continuous_recording()
