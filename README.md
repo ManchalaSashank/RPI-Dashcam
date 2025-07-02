@@ -40,5 +40,7 @@ Build a complete Iot based Raspberry Pi-based dashcam system that continuously r
 - Raspberry Pi OS Lite (32-bit recommended)
 - `systemd`, `crontab`
 
+---
+<h2>The Complete and detailed report of this whole project can be found in the (`report/RPI Dashcam.pdf`) <a href="./report/RPI Dashcam.pdf">Here</a>.</h2>
 
 
